@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [{ "type": "mcp_tool", "server": "plugin:pcbkit:pcbkit", "tool": "view", "timeout": 5 }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "mcp_tool",
+            "server": "plugin:pcbkit:pcbkit",
+            "tool": "check",
+            "input": { "changed": true, "path": "${tool_input.file_path}" },
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|apply_patch",
+        "hooks": [
+          {
+            "type": "mcp_tool",
+            "server": "plugin:pcbkit:pcbkit",
+            "tool": "check",
+            "input": { "changed": true },
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "pcbkit",
+  "version": "0.1.0",
+  "description": "Design, change and route KiCad boards with your agent: PCBKit shows the board live in your browser as the agent edits its files, routes it, keeps a library of real parts, and checks every write.",
+  "author": {
+    "name": "PCBKit",
+    "url": "https://pcbkit.dev"
+  },
+  "homepage": "https://pcbkit.dev",
+  "repository": "https://github.com/pcbkit-io/agent-plugin",
+  "keywords": [
+    "kicad",
+    "pcb",
+    "electronics",
+    "hardware",
+    "autorouter"
+  ],
+  "extensions": {
+    "com.openai": {
+      "hooks": "./hooks/hooks.json",
+      "interface": {
+        "displayName": "PCBKit",
+        "shortDescription": "Design and route KiCad boards, live in your browser",
+        "longDescription": "Design, change and route KiCad boards with your agent: PCBKit shows the board live in your browser as the agent edits its files, routes it, keeps a library of real parts, and checks every write.",
+        "developerName": "PCBKit",
+        "category": "Developer Tools",
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
+        "websiteURL": "https://pcbkit.dev",
+        "brandColor": "#0A5BF0",
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/icon.png",
+        "defaultPrompt": [
+          "Use PCBKit to show me this KiCad board.",
+          "Use PCBKit to design a USB-C powered ESP32 sensor board."
+        ]
+      }
+    }
+  }
+}

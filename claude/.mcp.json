@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "pcbkit": {
+      "command": "sh",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/pcbkit.sh",
+        "mcp"
+      ]
+    }
+  }
+}
