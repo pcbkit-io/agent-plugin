@@ -17,7 +17,8 @@ KiCad files are S-expressions: one item per list, `(footprint …)`, `(segment �
 6. **Compare** what `nets` reads from the file with your list, pin by pin (`nets { part: "U1" }` gives one part's pins). A design rule check cannot know that a pin is on the wrong net; this step can.
 7. **Look** at it (`look`): parts overlapping, off the board, crowded, or far from what they serve are easier to see than to compute. `look { around: "U1" }` zooms in on a part (labels over pads, tracks squeezed between pins); `look { view: "3d" }` is the board as an object. These pictures are yours alone: the person sees only what the view file shows them (below).
 8. **Route it** with `route`. Never write `segment`s and `via`s by hand. If it leaves connections unmade, move parts apart or turn them, then route again (`all: true` starts over).
-9. **Check it** with `check`: syntax, and KiCad's own design rule check where it can run. Fix what it lists. Then say what you made, what the check found (not what you expect), and what you did not verify.
+9. **Analyze it** with `analyze`: the voltage each supply loses on the way to each load and back through ground, the copper's resistance to it, the current through each via and the densest copper. Its findings name the place (mm), the pads and the nets: widen that copper, add a pour or vias, or move the load, then route and analyze again. What the copper is (a resistance) is exact; volts follow currents, and where the board does not say them they are assumed and listed: write the real ones into `.pcbkit/analysis.yaml` (below) when the person or a datasheet gives them.
+10. **Check it** with `check`: syntax, and KiCad's own design rule check where it can run. Fix what it lists. Then say what you made, what the check found (not what you expect), and what you did not verify.
 
 For more than a few items, write the files with a short script (Python) instead of by hand: generate uuids, compute positions, print the S-expressions.
 
@@ -125,6 +126,23 @@ Angles of `camera.3d`: `yaw` 0 looks from the front (the board's bottom edge, as
 - **Checks**: `check` already runs KiCad's design rule check where it can; `kicad-cli sch erc <file>` checks a schematic.
 - **Files for a factory**: `kicad-cli pcb export gerbers`, `… drill`, `… pos` (placement), `kicad-cli sch export bom`, `kicad-cli pcb export step` (the 3D model), `… pdf`, `… svg`; `zip` the Gerbers and drill files together.
 - **Simulation**: `ngspice -b circuit.cir` in PCBKit's shell, for a filter, a divider or a regulator's loop before it goes on the board.
+
+## What the analyses are told: `.pcbkit/analysis.yaml`
+
+Everything in it is optional; what it does not say is read from the board (names like `+3V3` and `GND`, a part's value, what joins two supplies) and listed in the answer under "Rests on".
+
+```yaml
+ambient: 25 # °C
+rails:
+  "+3V3":
+    voltage: 3.3
+    sources: [U2.5] # pins (U2.5) or whole parts (J1) the rail comes in by
+    loads: { U1: 0.15, U3.4: 0.02 } # amperes, by part or by pin
+    current: 0.4 # or the rail's whole load, shared among its loads
+    tolerance: 0.03 # the share of the voltage it may lose
+parts:
+  U2: { power: 0.4 } # watts it sheds
+```
 
 ## After each write
 

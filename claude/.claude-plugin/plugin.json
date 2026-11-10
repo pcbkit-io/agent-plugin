@@ -1,6 +1,6 @@
 {
   "name": "pcbkit",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Design, change and route KiCad boards with your agent: PCBKit shows the board live in your browser as the agent edits its files, routes it, keeps a library of real parts, and checks every write.",
   "author": {
     "name": "PCBKit",
