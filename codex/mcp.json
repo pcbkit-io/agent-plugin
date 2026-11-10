@@ -7,8 +7,7 @@
       "args": [
         "${PLUGIN_ROOT}/pcbkit.sh",
         "mcp"
-      ],
-      "cwd": "${PLUGIN_ROOT}"
+      ]
     }
   }
 }
