@@ -32,10 +32,12 @@ Then open a folder (empty, or with a KiCad project) and ask:
 | `show`               | Opens the board live in your browser, in 2D and 3D; it follows every change of the files |
 | `route`              | Routes the board with PCBKit's autorouter, by the board's own rules                      |
 | `find_parts`, `part` | Searches PCBKit's library of about 7 million parts with KiCad symbols and footprints     |
-| `check`              | Checks the KiCad files; runs by itself after each write                                  |
+| `check`              | Checks the KiCad files, with KiCad's own design rule check where KiCad is installed      |
+| `nets`, `look`       | Reads back what the board connects and gives the agent a picture, to verify its own work |
 | `view`               | Tells the agent what you selected on the board, so "this" means what you point at        |
 
-and a skill that teaches it to read and change KiCad files as text.
+and a skill that teaches it to read and change KiCad files as text and to take a board from an idea
+to routed and checked.
 
 ## Your files stay on your computer
 
