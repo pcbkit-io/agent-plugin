@@ -17,7 +17,7 @@ KiCad files are S-expressions: one item per list, `(footprint …)`, `(segment �
 6. **Compare** what `nets` reads from the file with your list, pin by pin (`nets { part: "U1" }` gives one part's pins). A design rule check cannot know that a pin is on the wrong net; this step can.
 7. **Look** at it (`look`): parts overlapping, off the board, crowded, or far from what they serve are easier to see than to compute. `look { around: "U1" }` zooms in on a part (labels over pads, tracks squeezed between pins); `look { view: "3d" }` is the board as an object. These pictures are yours alone: the person sees only what the view file shows them (below).
 8. **Route it** with `route`. Never write `segment`s and `via`s by hand. If it leaves connections unmade, move parts apart or turn them, then route again (`all: true` starts over).
-9. **Analyze it** with `analyze`: the voltage each supply loses on the way to each load and back through ground, the copper's resistance to it, the current through each via and the densest copper. Its findings name the place (mm), the pads and the nets: widen that copper, add a pour or vias, or move the load, then route and analyze again. What the copper is (a resistance) is exact; volts follow currents, and where the board does not say them they are assumed and listed: write the real ones into `.pcbkit/analysis.yaml` (below) when the person or a datasheet gives them.
+9. **Analyze it** with `analyze` (all of it, or `kinds`): `dc`, the voltage each supply loses on the way to each load and back through ground, the copper's resistance, via currents; `signal`, each track's impedance from a field solve of the copper it runs over, against its target (a net class like `50R`, a pair named `_P`/`_N`, an interface's name), pairs' skew, tracks with no plane under them, crosstalk; `heat`, the board's temperature under each part; `pdn`, each supply's impedance over frequency at its load, capacitors that are missing or too far. Its findings name the place (mm), the parts, pads and nets: change that copper or move that part, route and analyze again. What the copper is (a resistance, an impedance) is exact; volts and degrees follow currents and powers, and where the board does not say them they are assumed, listed, and said as what would be: write the real ones into `.pcbkit/analysis.yaml` (below) when the person or a datasheet gives them.
 10. **Check it** with `check`: syntax, and KiCad's own design rule check where it can run. Fix what it lists. Then say what you made, what the check found (not what you expect), and what you did not verify.
 
 For more than a few items, write the files with a short script (Python) instead of by hand: generate uuids, compute positions, print the S-expressions.
@@ -142,6 +142,8 @@ rails:
     tolerance: 0.03 # the share of the voltage it may lose
 parts:
   U2: { power: 0.4 } # watts it sheds
+signals:
+  "/USB_D+": { impedance: 90, rise: 0.5e-9 } # Ω (a pair's differential one), edge in seconds
 ```
 
 ## After each write
