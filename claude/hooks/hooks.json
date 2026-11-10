@@ -2,7 +2,15 @@
   "hooks": {
     "UserPromptSubmit": [
       {
-        "hooks": [{ "type": "mcp_tool", "server": "plugin:pcbkit:pcbkit", "tool": "view", "timeout": 5 }]
+        "hooks": [
+          {
+            "type": "mcp_tool",
+            "server": "plugin:pcbkit:pcbkit",
+            "tool": "view",
+            "input": { "hook": "UserPromptSubmit" },
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -13,7 +21,7 @@
             "type": "mcp_tool",
             "server": "plugin:pcbkit:pcbkit",
             "tool": "check",
-            "input": { "changed": true, "path": "${tool_input.file_path}" },
+            "input": { "changed": true, "path": "${tool_input.file_path}", "hook": "PostToolUse" },
             "timeout": 10
           }
         ]
@@ -25,7 +33,7 @@
             "type": "mcp_tool",
             "server": "plugin:pcbkit:pcbkit",
             "tool": "check",
-            "input": { "changed": true },
+            "input": { "changed": true, "hook": "PostToolUse" },
             "timeout": 10
           }
         ]
