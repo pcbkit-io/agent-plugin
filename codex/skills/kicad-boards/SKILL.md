@@ -1,151 +1,114 @@
 ---
 name: kicad-boards
-description: Read, write and change KiCad projects as text (.kicad_pcb boards, .kicad_sch schematics, .kicad_pro settings, symbol and footprint libraries), and take a board from an idea to routed and checked. Use before editing any KiCad file or designing a board.
+description: Designs and changes KiCad projects as text (.kicad_pcb boards, .kicad_sch schematics, .kicad_pro settings, symbol and footprint libraries) and takes a board from an idea to routed, checked and ready for a factory's review. Use before editing any KiCad file, designing or reviewing a board, choosing its parts, placing, routing or analysing it, or preparing its files for manufacturing.
 ---
 
-# KiCad boards as text
+# KiCad boards
 
-KiCad files are S-expressions: one item per list, `(footprint …)`, `(segment …)`, `(via …)`, `(zone …)`, `(symbol …)`, each with its own `(uuid "…")`. Coordinates are millimetres, y grows downwards; `(at x y angle)` places an item. A project is `<name>.kicad_pro` (settings, net classes), `<name>.kicad_pcb` (the board) and `<name>.kicad_sch` (the schematic), named alike.
+A board that works is made by checking, not by being sure. What goes wrong is rarely the file's syntax: it is a pin on the wrong net, a part without what its datasheet demands, a capacitor far from its pin, a board called ready that nobody checked. So the work goes through gates, in order, and a tool decides each one, not your confidence. Each gate is cheap next to the one after it: a wrong pin costs a line now and a board later.
 
-## A new board, in this order
+## The gates
 
-1. **Parts.** Find each with `find_parts` and read it with `part`: it gives the real footprint (pads, sizes) as KiCad text and the pins by number. Do not invent pad geometry or pin numbers for a part the library has. Passives, headers and common connectors are in KiCad's own libraries too, where KiCad is installed (below).
-2. **Connections, written down first:** every net with the pins on it (`GND: U1.4, C1.2, J1.2`). This list is what you check the board against later.
-3. **Outline.** One closed shape on `Edge.Cuts` (a `gr_rect`, a `gr_circle`, or `gr_line`s and `gr_arc`s that meet end to end).
-4. **Footprints with their nets.** Each pad names its net; pads of one net get connected by the router. Place parts inside the outline, at least 1 mm from the edge and from each other: connectors at the edges, a decoupling capacitor beside the pin it serves, parts that talk to each other close together, room between them for tracks.
-5. **Show it** (`show`, once), so the person watches the rest.
-6. **Compare** what `nets` reads from the file with your list, pin by pin (`nets { part: "U1" }` gives one part's pins). A design rule check cannot know that a pin is on the wrong net; this step can.
-7. **Look** at it (`look`): parts overlapping, off the board, crowded, or far from what they serve are easier to see than to compute. `look { around: "U1" }` zooms in on a part (labels over pads, tracks squeezed between pins); `look { view: "3d" }` is the board as an object. These pictures are yours alone: the person sees only what the view file shows them (below).
-8. **Route it** with `route`. Never write `segment`s and `via`s by hand. If it leaves connections unmade, move parts apart or turn them, then route again (`all: true` starts over).
-9. **Analyze it** with `analyze` (all of it, or `kinds`): `dc`, the voltage each supply loses on the way to each load and back through ground, the copper's resistance, via currents; `signal`, each track's impedance from a field solve of the copper it runs over, against its target (a net class like `50R`, a pair named `_P`/`_N`, an interface's name), pairs' skew, tracks with no plane under them, crosstalk; `heat`, the board's temperature under each part; `pdn`, each supply's impedance over frequency at its load, capacitors that are missing or too far. Its findings name the place (mm), the parts, pads and nets: change that copper or move that part, route and analyze again. What the copper is (a resistance, an impedance) is exact; volts and degrees follow currents and powers, and where the board does not say them they are assumed, listed, and said as what would be: write the real ones into `.pcbkit/analysis.yaml` (below) when the person or a datasheet gives them.
-10. **Check it** with `check`: syntax, and KiCad's own design rule check where it can run. Fix what it lists. Then say what you made, what the check found (not what you expect), and what you did not verify.
-
-For more than a few items, write the files with a short script (Python) instead of by hand: generate uuids, compute positions, print the S-expressions.
-
-Before you call a board ready, the things no checker sees: every supply pin has its decoupling capacitor; reset, enable and open-drain lines (I2C) have their pull-ups; a crystal has its load capacitors; LEDs and polarised capacitors face the right way; a connector's pin order matches what plugs into it; a connector that takes its plug from the side (USB, a barrel jack, a card slot) sits at the board's edge with its opening facing out, also after the outline changed; nothing the part's datasheet calls mandatory is left floating.
-
-## The smallest valid board
-
-A resistor and an LED on one net, ready to route. Keep this shape: the layers table, the nets declared once and used by number and name in pads, a uuid on every item.
+Copy this list into your notes and tick it as you go. Do not start a step while the one before it fails.
 
 ```
-(kicad_pcb
-	(version 20241229)
-	(generator "pcbkit")
-	(generator_version "1.0")
-	(general (thickness 1.6))
-	(paper "A4")
-	(layers
-		(0 "F.Cu" signal)
-		(2 "B.Cu" signal)
-		(5 "F.SilkS" user "F.Silkscreen")
-		(1 "F.Mask" user)
-		(13 "F.Paste" user)
-		(25 "Edge.Cuts" user)
-		(31 "F.CrtYd" user "F.Courtyard")
-		(35 "F.Fab" user)
-	)
-	(net 0 "")
-	(net 1 "VIN")
-	(net 2 "LED_A")
-	(net 3 "GND")
-	(footprint "Resistor_SMD:R_0805_2012Metric"
-		(layer "F.Cu")
-		(uuid "6f0c2f0e-3b1c-4a53-9a51-2f1d8f1f0a01")
-		(at 110 105)
-		(property "Reference" "R1" (at 0 -1.65 0) (layer "F.SilkS") (uuid "6f0c2f0e-3b1c-4a53-9a51-2f1d8f1f0a02")
-			(effects (font (size 1 1) (thickness 0.15)))
-		)
-		(property "Value" "330" (at 0 1.65 0) (layer "F.Fab") (uuid "6f0c2f0e-3b1c-4a53-9a51-2f1d8f1f0a03")
-			(effects (font (size 1 1) (thickness 0.15)))
-		)
-		(attr smd)
-		(pad "1" smd roundrect (at -0.9125 0) (size 1.025 1.4) (layers "F.Cu" "F.Mask" "F.Paste") (roundrect_rratio 0.243902)
-			(net 1 "VIN") (uuid "6f0c2f0e-3b1c-4a53-9a51-2f1d8f1f0a04")
-		)
-		(pad "2" smd roundrect (at 0.9125 0) (size 1.025 1.4) (layers "F.Cu" "F.Mask" "F.Paste") (roundrect_rratio 0.243902)
-			(net 2 "LED_A") (uuid "6f0c2f0e-3b1c-4a53-9a51-2f1d8f1f0a05")
-		)
-	)
-	(gr_rect (start 100 100) (end 125 110)
-		(stroke (width 0.1) (type default)) (fill no) (layer "Edge.Cuts") (uuid "6f0c2f0e-3b1c-4a53-9a51-2f1d8f1f0c01")
-	)
-)
+- [ ] 1. DESIGN.md says what is being built: goal, supplies, blocks, every net with its pins
+- [ ] 2. Every part with more than two pins has its pin table from its datasheet (reference/parts.md)
+- [ ] 3. The board file holds the outline and the footprints with their nets; PCBKit's check of the write is clean
+- [ ] 4. `nets` agrees with DESIGN.md pin by pin (and with the schematic's netlist, when there is a schematic)
+- [ ] 5. Placement: fixed parts first, then by how little distance each connection tolerates (reference/placement.md); `look` at it
+- [ ] 6. `route` connects everything; what it could not is fixed by moving parts, not by forcing tracks
+- [ ] 7. `check`: KiCad's design rules, nothing unconnected
+- [ ] 8. `analyze`: what it finds is fixed in the board (reference/analysis.md)
+- [ ] 9. The review lists, read against the board (reference/review.md)
+- [ ] 10. For a factory: its limits as rules, the files made and looked at (reference/manufacturing.md)
 ```
 
-- A pad's `(at …)` is relative to its footprint; a footprint turned by `(at x y 90)` turns its pads with it.
-- A through-hole pad is `(pad "1" thru_hole circle (at 0 0) (size 1.7 1.7) (drill 1.0) (layers "*.Cu" "*.Mask") (net 3 "GND") (uuid "…"))`; pin 1 is usually `rect`.
-- A part on the back has `(layer "B.Cu")` and its pads `"B.Cu" "B.Mask" "B.Paste"`.
-- Wider power tracks and clearances are net classes in the `.kicad_pro` (`net_settings.classes`, with `netclass_patterns` naming the nets); the router follows them.
+A small change to a board that exists (move a part, change a value) needs only the gates it touches: the write's check, `nets` for what was rewired, `route` if copper moved, `check`.
 
-## Changing a board that exists
+## 1. Write down what is being built: `DESIGN.md`
 
-- Boards can be large (tens of megabytes). Find what you need with `grep -n` and read around it with `sed -n 'a,bp'` or the read tool's offset and limit; never read a whole board.
-- A footprint is found by its reference: `grep -n '"Reference" "U3"'`, then read up to its `(footprint` line and its closing parenthesis.
-- Make small, exact replacements of unique text (an item's uuid makes it unique). For many similar changes, use `sed` or a script over the file.
-- Keep the file's own format: its `version`, tabs, how it names nets in pads (`(net 5 "GND")`, or `(net "GND")` in the newest files).
-- Every new item gets a new random uuid (`uuidgen` or any v4 uuid). Never reuse one.
-- Moving a footprint: change its `(at x y angle)`; its pads move with it. Tracks connected to it don't: route again.
-- Keep the schematic and the board in step: a part added to one belongs in the other, with the same reference and footprint.
-- If the person has the board open in KiCad, KiCad does not see your changes and will overwrite them when it saves: tell them to reload it there (File → Revert) first.
+Before any part is chosen, write `DESIGN.md` in the project and keep it current. It is what the board is checked against, what the person reads to see whether you understood them, and what the next conversation (yours, or another agent's working beside you) reads first. Short and plain:
 
-## What the person sees: the view file
+```markdown
+# Goal
 
-`.pcbkit/view.yaml` is the person's view of the board, as a file. Read it to learn what they look at; write it to show them something (their view glides there). Every field is optional:
+A 555 blinker on USB-C: one LED at about 2 Hz. 30 × 22 mm, two layers.
 
-```yaml
-view: 3d # 2d, 3d or schematic
-select: [U1, C3, "net:GND"] # lit and framed: references, pads (U1/3), net:<name>, layer:<name>, item uuids
-layers: { "B.Cu": false, "F.SilkS": true } # KiCad layer names shown or hidden
-components: false # the bare board, without parts
-explode: true # the copper layers apart
-look: { mask: Black } # a mask colour to try in 3D (Green, Black, Blue, Red, White, Purple, Yellow, "#RRGGBB"); the design keeps its own
-camera:
-  2d: { center: [110, 105], width: 40 } # mm
-  3d: { target: [110, 105, 0], yaw: 30, pitch: 40, distance: 120 }
-tour: # takes the person round the board in 3D, stop by stop, with your words under it
-  - show: [J1, R2, R3] # what the stop frames and marks (ids as in select)
-    title: Power comes in # optional
-    say: The USB-C socket takes 5 V. R2 and R3 tell the charger a device is here.
-  - show: [U1, C1, C2]
-    say: The regulator turns 5 V into 3.3 V. C1 and C2 keep it steady.
+# Supplies
+
+| Rail | Volts | From | Load |
+| +5V | 5.0 | J1 (USB-C, 5.1 kΩ on CC1 and CC2) | 5 mA |
+
+# Blocks
+
+Power in (J1, R1, R2) → timer (U1, R3, R4, C1, C2) → LED (D1, R5)
+
+# Nets
+
+GND: J1.A1, J1.B1, J1.A12, J1.B12, U1.1, C1.2, C2.2, D1.K, R1.2, R2.2
++5V: J1.A4, J1.B4, J1.A9, J1.B9, U1.8, U1.4, R3.1, C3.1
+…
+
+# Decisions and what they rest on
+
+- U1 is TLC555 (CMOS): 2 V–15 V, 170 µA (datasheet p.5), so R3 and R4 can be large.
+- Assumed, not given: the LED runs at 3 mA.
+
+# Not verified
+
+- The blink rate on a real part (±20 % with these tolerances).
 ```
 
-Angles of `camera.3d`: `yaw` 0 looks from the front (the board's bottom edge, as it reads), 90 from its right edge, 180 from the back edge, -90 from the left; `pitch` is degrees above the board (85 is from over it), negative from under it: the back of the board is `pitch: -50`. Leave `distance` out and the board is framed. `look { view: "3d", yaw, pitch }` gives you the same picture, to check what you are about to show.
+Where the goal is a number (efficiency, battery life, price, size), write it as a budget under its own heading before the parts are final, every term of the goal as the person stated it with its figure: for a power stage the watts lost in each part at the real current (from its datasheet), summed to the efficiency you expect; where the goal names cost or size, the parts' price and the board's area in the same table. A term left without a number is a term dropped, and the design over-builds on the ones that were counted.
 
-"Show me the back", "zoom in on the regulator", "what does it look like in black" are changes of this file, not of the design.
+For each net, say who drives it and at what voltage when it is not obvious: most wrong connections are a part given a role it does not have (a transistor's collector called a gate, an output joined to an output). Design a large board block by block (power, the processor, each interface), each with its own nets, and join them through named nets.
 
-"Walk me through it", "explain this board", "how does the power get to the chip" are a `tour`: a few stops in the order the story goes (the signal's or the power's way, not the references' order), each with a sentence or two a person can read in the time the camera turns round it: what the parts are there for, not their part numbers again. It plays as soon as the file has it; the person can pause it, step through it and close it (which takes it out of the file). The board's real colours and finish are in the `.kicad_pcb` (`setup` → `stackup`: the mask and silkscreen layers' `color`, `copper_finish`).
+## 2. Parts and their datasheets
 
-## Where KiCad is installed
+Read **reference/parts.md** before choosing parts. In short: find parts with `find_parts` and read them with `part` (the real footprint and pins); get each datasheet and copy the pin table from it before a pin is used; give every part what its datasheet makes mandatory. A design that rests on memory of a pinout is a guess.
 
-`kicad-cli` and Python's `pcbnew` are there in PCBKit's own shell, and on the person's computer when they have KiCad (`kicad-cli version`; on macOS it is in `/Applications/KiCad/KiCad.app/Contents/MacOS`). When they are, use them for what text editing does badly:
+## 3–4. The board file, and the connections read back
 
-- **KiCad's libraries**: footprints in `/usr/share/kicad/footprints/<Library>.pretty/<Name>.kicad_mod`, symbols in `/usr/share/kicad/symbols/<Library>.kicad_sym` (macOS: `/Applications/KiCad/KiCad.app/Contents/SharedSupport/`). `ls` and `grep` them; a `.kicad_mod` file is the footprint's text, ready to paste into a board with its reference, position and nets.
-- **A board by script**: `pcbnew.LoadBoard(path)`, `pcbnew.FootprintLoad(library_dir, name)`, `footprint.SetPosition(pcbnew.VECTOR2I_MM(x, y))`, `pad.SetNet(net)`, `board.Add(footprint)`, `board.Save(path)`. Good for many parts at once, for arrays and circles of parts, and for measuring (`board.GetBoardEdgesBoundingBox()`, `footprint.GetBoundingBox()`).
-- **Checks**: `check` already runs KiCad's design rule check where it can; `kicad-cli sch erc <file>` checks a schematic.
-- **Files for a factory**: `kicad-cli pcb export gerbers`, `… drill`, `… pos` (placement), `kicad-cli sch export bom`, `kicad-cli pcb export step` (the 3D model), `… pdf`, `… svg`; `zip` the Gerbers and drill files together.
-- **Simulation**: `ngspice -b circuit.cir` in PCBKit's shell, for a filter, a divider or a regulator's loop before it goes on the board.
+The files' format, the smallest valid board and how to change a board that exists are in **reference/format.md**. Write the outline (one closed shape on `Edge.Cuts`) and the footprints, each pad naming its net.
 
-## What the analyses are told: `.pcbkit/analysis.yaml`
+Then compare what `nets` reads from the file with `DESIGN.md`, pin by pin (`nets { part: "U1" }` gives one part's pins). A rule check cannot know that a pin is on the wrong net; this comparison can, because the two were written at different moments. Where there is a schematic, a third reading must agree: `kicad-cli sch export netlist`. Keep the schematic and the board in step: a part added to one belongs in the other, with the same reference and footprint.
 
-Everything in it is optional; what it does not say is read from the board (names like `+3V3` and `GND`, a part's value, what joins two supplies) and listed in the answer under "Rests on".
+Show the board once there is one (`show`, where the tool exists), so the person watches the rest.
 
-```yaml
-ambient: 25 # °C
-rails:
-  "+3V3":
-    voltage: 3.3
-    sources: [U2.5] # pins (U2.5) or whole parts (J1) the rail comes in by
-    loads: { U1: 0.15, U3.4: 0.02 } # amperes, by part or by pin
-    current: 0.4 # or the rail's whole load, shared among its loads
-    tolerance: 0.03 # the share of the voltage it may lose
-parts:
-  U2: { power: 0.4 } # watts it sheds
-signals:
-  "/USB_D+": { impedance: 90, rise: 0.5e-9 } # Ω (a pair's differential one), edge in seconds
-```
+## 5. Placement
+
+Read **reference/placement.md**. Placement decides most of what routing can do: no track repairs a capacitor that is far from its pin. Then `look` at it: parts overlapping, off the board, crowded or far from what they serve are easier to see than to compute. `look { around: "U1" }` zooms in on a part; `look { view: "3d" }` is the board as an object. These pictures are yours alone.
+
+## 6–8. Route, check, analyse
+
+`route` draws the tracks and vias; never write `segment`s and `via`s by hand. Net classes, planes, pairs and what the analyses compute and are told are in **reference/analysis.md**. What `route` leaves open is a placement problem: move parts apart or turn them, and route again (`all: true` starts over).
+
+`check` runs the syntax check and KiCad's design rule check where it can. `analyze` computes what the routed board means physically. What they find is yours to fix, not to list: change the design, route, and run them again, as many rounds as it takes. Boards are made by ripping up and trying again.
+
+**A fix that failed twice is the wrong fix.** Stop repeating it and change something larger: move the part, turn it, give the board more room or two more layers, choose another part. If two tools disagree about the same thing (one says clean, one says not), find out which rule each applies before changing the board.
+
+A finding that is not a fault (a rule tripped by something intended, such as two grounds joined on purpose) is answered with its reason, in `DESIGN.md` and to the person, never by loosening a rule quietly.
+
+## 9. Review
+
+Read **reference/review.md** and go through it against the board: the things no checker sees. A finding needs evidence (the pin, the datasheet's page, the measured distance); a suspicion without evidence is a question to look into, not a finding.
+
+## 10. For a factory
+
+Read **reference/manufacturing.md** before any file for a factory is made.
+
+## What you tell the person
+
+Say what you made, then three short lists: **verified** (which check, what it found, not what you expect), **assumed** (and on what), **not verified** (what needs a bench, a measurement or the factory's own check). Never call a board ready to manufacture on your own word: say which gates it passed. A board that passes every check here is a candidate for a person's review and a first build, not a product.
+
+## Other references
+
+- **reference/device.md**: the board as a running device: its program (the folder `firmware`, built by its own build system), the `device` tool's plan, runs and steps that prove what the device is for, the device file (`.pcbkit/device.yaml`). Read it when the board has a processor and the work includes its program.
+- **reference/enclosure.md**: the device's enclosure: printed parts (a case, button caps, a stand), bought hardware (screws, inserts, nuts) and the assembly, written as a build123d program in `enclosure/enclosure.py` and built and checked by the `enclosure` tool. Read it when the person wants a case for the board or a device they can hold, before writing any of it.
+- **reference/view.md**: the person's view as a file (`.pcbkit/view.yaml`): show them something, a back view, a tour of the board.
+- **reference/kicad-tools.md**: `kicad-cli`, KiCad's Python and where it trips, KiCad's libraries, pictures of a schematic, simulation, what PCBKit's own shell has.
 
 ## After each write
 
-PCBKit checks the KiCad files you wrote and reports syntax problems with line and column: fix them before anything else. The person sees every write at once, so work in steps that leave the files valid.
+PCBKit checks the KiCad files you wrote and reports syntax problems with line and column: fix them before anything else. The person sees every write at once, so work in steps that leave the files valid. Other agents and the person may be changing the same project: read a file again before you change it.

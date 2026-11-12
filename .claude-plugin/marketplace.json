@@ -2,7 +2,7 @@
   "name": "pcbkit",
   "owner": {
     "name": "PCBKit",
-    "url": "https://pcbkit.dev"
+    "url": "https://pcbkit.io"
   },
   "metadata": {
     "description": "PCBKit for coding agents"
@@ -12,7 +12,7 @@
       "name": "pcbkit",
       "source": "./claude",
       "description": "Design, change and route KiCad boards with your agent: PCBKit shows the board live in your browser as the agent edits its files, routes it, keeps a library of real parts, and checks every write.",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "category": "development"
     }
   ]

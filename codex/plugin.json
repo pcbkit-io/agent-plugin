@@ -1,13 +1,13 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "pcbkit",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Design, change and route KiCad boards with your agent: PCBKit shows the board live in your browser as the agent edits its files, routes it, keeps a library of real parts, and checks every write.",
   "author": {
     "name": "PCBKit",
-    "url": "https://pcbkit.dev"
+    "url": "https://pcbkit.io"
   },
-  "homepage": "https://pcbkit.dev",
+  "homepage": "https://pcbkit.io",
   "repository": "https://github.com/pcbkit-io/agent-plugin",
   "keywords": [
     "kicad",
@@ -29,7 +29,7 @@
           "Read",
           "Write"
         ],
-        "websiteURL": "https://pcbkit.dev",
+        "websiteURL": "https://pcbkit.io",
         "brandColor": "#0A5BF0",
         "composerIcon": "./assets/icon.png",
         "logo": "./assets/icon.png",
