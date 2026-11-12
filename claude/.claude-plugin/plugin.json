@@ -15,5 +15,6 @@
     "hardware",
     "autorouter"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "privacyPolicyUrl": "https://pcbkit.io/privacy"
 }
