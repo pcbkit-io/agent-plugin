@@ -1,9 +1,10 @@
 # Review: what no checker sees
 
-Go through this against the board before you say it is done. Read as a reviewer who did not design it: for each line, find the evidence in the files (the pin, the value, the distance, the datasheet's page), not in your memory of having done it. Report by severity: **critical** (it will not work or will be damaged), **warning** (it may not work in some condition, or is hard to build), **note**. No evidence, no finding.
+Go through this against the board before you say it is done. Read as a reviewer who did not design it: for each line, find the evidence in the files (the pin, the value, the distance, the datasheet's page), not in your memory of having done it. Report by severity: **critical** (it will not work or will be damaged), **warning** (it may not work in some condition, or is hard to build), **note**. What the board is for sets the level: a missing ESD part is a warning on a hobby board and critical on a product. No evidence, no finding.
 
 ## Contents
 
+- What it also needs
 - Schematic and connections
 - Power
 - Signals
@@ -12,10 +13,16 @@ Go through this against the board before you say it is done. Read as a reviewer 
 - Mechanical and assembly
 - Bring-up
 
+## What it also needs
+
+- [ ] Every line under `# What it also needs` in `DESIGN.md` that says "in" is on the board: the part is there, and it reaches a pin that can do the job (the battery's divider on an ADC-capable pin the radio does not take, the wake button on a pin that wakes, the charger's status on a GPIO).
+- [ ] Walk the device's day once more against the finished board (reference/completeness.md): nothing the program or the person will want to know is left without a path.
+- [ ] What was left out is written down with what the person then cannot do, and they were told.
+
 ## Schematic and connections
 
 - [ ] Every part's pins match its datasheet's table for this package (number, function), and its footprint is that package (pin 1, pad count, exposed pad).
-- [ ] `nets` agrees with `DESIGN.md`; the schematic's netlist agrees with the board; ERC is clean or each message has its reason.
+- [ ] `check` is clean: the schematic's electrical rules (or each message has its reason in `DESIGN.md`), and the board and the schematic connect the same pads.
 - [ ] No input floats: every unused input, enable, reset and strap pin is tied where the datasheet says.
 - [ ] No two outputs share a net (unless open drain, with its pull-up).
 - [ ] Polarised parts face the right way: diodes, LEDs, electrolytic and tantalum capacitors, connectors' pin 1.
@@ -42,7 +49,8 @@ Go through this against the board before you say it is done. Read as a reviewer 
 
 - [ ] ESD protection on data lines at each connector that a person touches; current limit or fuse on power outputs.
 - [ ] Each connector's pin order matches what plugs into it (straight or mirrored cable, the standard's pinout).
-- [ ] USB-C: 5.1 kΩ on CC1 and on CC2 (a device), shield and ground as intended.
+- [ ] USB-C: 5.1 kΩ on CC1 and another on CC2 (a device), the two D+ pins joined and the two D− pins joined on a receptacle, the pair routed through its ESD part, shield and ground as intended.
+- [ ] Each connector's pins carry their current (a small battery connector is about an ampere a pin); a plug that can go in turned or shifted puts no supply on a signal.
 
 ## Layout
 
@@ -65,4 +73,6 @@ Go through this against the board before you say it is done. Read as a reviewer 
 ## Bring-up
 
 - [ ] A test point on every rail and on what you would debug; a ground point for a probe.
-- [ ] A way to power the board in parts (a 0 Ω link or a jumper between a regulator and its loads) on a first design.
+- [ ] A way to power the board in parts (a 0 Ω link or a jumper between a regulator and its loads) on a first design, which is also where current is measured.
+- [ ] The serial console's pads, the debug connector and a light the program controls are reachable, in the enclosure too.
+- [ ] `DESIGN.md` has the first power-up for this board, step by step, for the person (reference/circuits.md).

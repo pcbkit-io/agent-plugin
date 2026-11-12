@@ -23,6 +23,8 @@ the program.
 - [ ] 5. Everything that must reach outside is declared (plug, light, pin, picture, your own)
 - [ ] 6. The steps of assembly, in order
 - [ ] 7. `enclosure`: every line ok
+- [ ] 7a. `analyze` with `heat`: the board is solved in this case; no part of it within 10 K of what
+      its material bears (PLA 55 °C, PETG 70 °C; a cell must not be charged past 45 °C)
 - [ ] 8. Tell the person what to measure on the real board before printing, and how to print
 ```
 
@@ -79,7 +81,9 @@ of the outline's box is (0, 0). Everything you draw is in this frame.
   cells in their holders, a daughter board): an obstacle that moves with the board. Say what it is
   made of, so it is drawn and weighed as that and the heat analysis knows it:
   `material="glass"`, `material="li-ion cell"`. A display also says its picture's rectangle,
-  `screen=(x0, y0, x1, y1)`: the page shows there what the running device draws.
+  `screen=(x0, y0, x1, y1)`, and the board's part it is the panel of, `ref="DS1"`: the page shows
+  there what the running device draws on that display. What sheds heat itself says how much
+  (`power=1.0`, a backlight's watts): the heat analysis warms the case with it.
 
 See what the board is before drawing: the `enclosure` tool with `tell: "board"` (in a shell:
 `pcbkit enclosure board`) lists every part with its side, kind, place, height and courtyard, the

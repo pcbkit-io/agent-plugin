@@ -74,5 +74,5 @@ A resistor and an LED on one net, ready to route. Keep this shape: the layers ta
 - Keep the file's own format: its `version`, tabs, how it names nets in pads (`(net 5 "GND")`, or `(net "GND")` in the newest files).
 - Every new item gets a new random uuid (`uuidgen` or any v4 uuid). Never reuse one.
 - Moving a footprint: change its `(at x y angle)`; its pads move with it. Tracks connected to it don't: route again.
-- Keep the schematic and the board in step: a part added to one belongs in the other, with the same reference and footprint.
+- Keep the schematic and the board in step: a part added to one belongs in the other, with the same reference and footprint; where the project has `scripts/design.py`, change the design there and write both from it (reference/schematic.md). `check` names every pad where they differ.
 - If the person has the board open in KiCad, KiCad does not see your changes and will overwrite them when it saves: tell them to reload it there (File → Revert) first.

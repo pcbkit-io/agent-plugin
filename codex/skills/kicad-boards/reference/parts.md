@@ -21,7 +21,7 @@ Prefer parts that are in stock in quantity and that a second maker also makes; s
 
 Get the datasheet of every part with more than two pins and keep it in the project (`curl -L -o refs/<part>.pdf <link>`; `pdftotext -layout refs/<part>.pdf -` reads it; a table that comes out scrambled is read as a picture: `pdftoppm -r 120 -f 5 -l 5 -png refs/<part>.pdf /tmp/p` and look at the page). What you remember of a part is where to look, not what to build from: packages of one part number have different pinouts, and a second source's "compatible" part often differs in one pin.
 
-Read, at least: the pin table for **the package you chose**, the absolute maximum ratings, the recommended operating conditions, the typical application circuit, and the layout section when there is one. Note the page next to what you take from it (`DESIGN.md`: "FB divider per eq. 3, p.14").
+Read, at least: the pin table for **the package you chose**, the absolute maximum ratings, the recommended operating conditions, the typical application circuit, and the layout section when there is one. For a processor or a radio, also get its maker's **hardware design guide** (reference/circuits.md): the reset circuit, the boot pins, the crystal's extra parts and the antenna's clearances are there, not in the pin table. And read a major chip's errata sheet. Note the page next to what you take from it (`DESIGN.md`: "FB divider per eq. 3, p.14").
 
 ## The pin table
 
@@ -33,7 +33,7 @@ Before a part's pins go on nets, write its pin table from the datasheet (in `DES
 - **Levels meet.** Each input sees a voltage inside its limits from what drives it (a 3.3 V pin from a 5 V output needs a level shifter or a divider, or a pin the datasheet calls 5 V tolerant).
 - **Pin 1 and the view.** Tables are drawn from the top; a footprint mirrored or a connector drawn from the mating side reverses the order. Check a connector's pin order against what plugs into it.
 
-When the board file is written, compare its pins with this table (`nets { part: "U1" }`), and give each pad its `(pinfunction …)` and `(pintype …)` from it: the analyses read them.
+The pins go into `scripts/design.py` by number from this table (reference/schematic.md). When the board file is written, read a chip's pins back against it (`nets { part: "U1" }`), and give each pad its `(pinfunction …)` and `(pintype …)` from it: the analyses read them.
 
 ## What a part needs around it
 
@@ -49,7 +49,7 @@ What the datasheet's application circuit shows is part of the part:
 
 ## Choosing values and ratings
 
-- A capacitor's voltage rating is at least twice its working voltage for ceramics (they lose capacitance with voltage), 1.25× for electrolytics; a resistor's power is at least twice what it dissipates (I²R: compute it for every resistor in a power path or a current sense); a connector and an inductor carry the current with margin.
+- A ceramic capacitor is chosen by what is left of it at its working voltage (the maker's DC-bias curve: small packages lose most), with a rating of at least twice that voltage as the rule of thumb; 1.25× for electrolytics; a resistor's power is at least twice what it dissipates (I²R: compute it for every resistor in a power path or a current sense); a connector and an inductor carry the current with margin.
 - A part works inside its **recommended** conditions, not just under its absolute maximum: check each rail against each part on it, at the highest input the board may see.
 - Compute what can be computed and write the numbers down: a divider's output, a filter's corner, an LED's current, a regulator's dissipation ((Vin − Vout) × I for a linear one) and its temperature rise from its package's thermal resistance. `ngspice` checks a filter, a divider or a loop before it goes on the board (reference/kicad-tools.md).
 

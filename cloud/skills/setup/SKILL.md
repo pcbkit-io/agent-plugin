@@ -17,6 +17,8 @@ Then ask what they want to build, offering three examples they can pick:
 - a breakout board for an I2C sensor with a Qwiic connector;
 - a small ESP32 board with a button and a status LED.
 
-When they answer, follow the `kicad-boards` skill: make the project, show the board at once with
-`show` so they watch it take shape, and lead them one step at a time. Say it in their language and
-in plain words; no experience is needed.
+When they answer, follow the `kicad-boards` skill: make the project, show it at once with `show`
+so they watch it take shape (the schematic first, then the board), and lead them one step at a
+time. Ask the two things that decide most (will they solder it themselves or have it assembled,
+and what powers it), bring up what such a device needs that they did not mention, and say it in
+their language and in plain words; no experience is needed.
