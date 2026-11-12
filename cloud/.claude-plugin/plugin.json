@@ -1,0 +1,24 @@
+{
+  "name": "pcbkit",
+  "displayName": "PCBKit",
+  "version": "0.1.8",
+  "description": "Design printed circuit boards with your agent as plain KiCad projects: PCBKit keeps the project, shows the board live, chooses real parts, routes the copper, checks it with KiCad's rules and makes the files a factory needs.",
+  "author": {
+    "name": "PCBKit",
+    "url": "https://pcbkit.io",
+    "email": "support@pcbkit.io"
+  },
+  "homepage": "https://pcbkit.io",
+  "repository": "https://github.com/pcbkit-io/agent-plugin",
+  "keywords": [
+    "pcb",
+    "circuit board",
+    "electronics",
+    "hardware",
+    "kicad",
+    "routing",
+    "gerber"
+  ],
+  "license": "MIT",
+  "privacyPolicyUrl": "https://pcbkit.io/privacy"
+}

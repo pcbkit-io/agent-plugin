@@ -59,5 +59,8 @@ it against the checksum in `pcbkit.sh`.
 
 ## This repository
 
-`claude/` is the plugin for Claude Code, `codex/` the same plugin for Codex. Both are generated
-from PCBKit's source; issues are welcome here.
+`claude/` is the plugin for Claude Code, `codex/` the same plugin for Codex: both work on a folder
+on your computer. `cloud/` is the plugin as Claude's directory lists it (Claude in chat, Cowork and
+Claude Code): the same skill with PCBKit's own server at `https://pcbkit.io/mcp`, where the board is
+a project kept in your PCBKit account and nothing runs on your computer. All are generated from
+PCBKit's source; issues are welcome here.
