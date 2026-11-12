@@ -76,7 +76,10 @@ of the outline's box is (0, 0). Everything you draw is in this frame.
   not give it. The build fails until every part has one (0 for a part that is flat).
 - `board.button("SW1", top=4.3, travel=0.25)`: a button's actuator, where its value does not say.
 - `board.add("panel", solid)`: what sits on the board without being in its file (a taped display,
-  cells in their holders, a daughter board): an obstacle that moves with the board.
+  cells in their holders, a daughter board): an obstacle that moves with the board. Say what it is
+  made of, so it is drawn and weighed as that and the heat analysis knows it:
+  `material="glass"`, `material="li-ion cell"`. A display also says its picture's rectangle,
+  `screen=(x0, y0, x1, y1)`: the page shows there what the running device draws.
 
 See what the board is before drawing: the `enclosure` tool with `tell: "board"` (in a shell:
 `pcbkit enclosure board`) lists every part with its side, kind, place, height and courtyard, the
@@ -104,7 +107,9 @@ enc.part("tray", body, up=(0, 0, 1))                      # prints open side up
   faces up on the printer's bed: `(0, 0, -1)` for a shell that prints face down. `supports=True`
   when it is meant to print on supports.
 - `enc.part("cap", cap, at={s.ref: (s.x, s.y) for s in buttons})`: one shape drawn at its own
-  origin, standing at each place. `colour="#c8452c"` to tell parts apart.
+  origin, standing at each place. `colour="#c8452c"` to tell parts apart; `material="TPU"` for a
+  part of another material than the process's (`tell: "materials"` lists them with how warm each
+  may get: PLA gives at 55 °C, PETG at 70 °C).
 - build123d, not CadQuery: no `Workplane`, no chains. `Box`, `Cylinder` are centred on the origin;
   move with `Pos(x, y, z) * shape`, turn with `Rot(rx, ry, rz) * shape`. Fillet and chamfer take
   edges: `fillet(part.edges().filter_by(Axis.Z), 3)`, `chamfer(part.edges().group_by(Axis.Z)[-1], 1)`
