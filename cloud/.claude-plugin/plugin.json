@@ -20,5 +20,8 @@
     "gerber"
   ],
   "license": "MIT",
-  "privacyPolicyUrl": "https://pcbkit.io/privacy"
+  "privacyPolicyUrl": "https://pcbkit.io/privacy",
+  "termsOfServiceUrl": "https://pcbkit.io/terms",
+  "documentationUrl": "https://pcbkit.io/docs",
+  "supportUrl": "https://pcbkit.io/support"
 }
