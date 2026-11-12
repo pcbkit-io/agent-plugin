@@ -6,6 +6,10 @@
         "${CLAUDE_PLUGIN_ROOT}/pcbkit.sh",
         "mcp"
       ]
+    },
+    "pcbkit-cloud": {
+      "type": "http",
+      "url": "https://pcbkit.io/mcp"
     }
   }
 }
