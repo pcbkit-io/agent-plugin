@@ -220,6 +220,14 @@ again. Build after each change; a build takes seconds. When every line is ok the
 `print/<part>.stl` turned the way it prints, `print/plate-1.3mf` (the parts arranged on the bed),
 and the page shows the device.
 
+The program is also built by itself, a moment after any file in `enclosure/` changes (your write,
+the person's own edit): the page says while it builds, and when what it shows is older than the
+program or the program stopped. So the person may change the program by hand beside you: read
+`enclosure/enclosure.py` again before you edit it, and keep what they changed. One build runs at a
+time; your call waits for one that is running, and when nothing it is built from changed since
+the last build it answers with that build (`again: true` builds anyway). How the last build went
+is also in `enclosure/out/build.json` (`state`: building, built or failed; `said`: what it printed).
+
 ### 8. What you tell the person
 
 - What you made: the parts, the hardware to buy (the build's list), the size.

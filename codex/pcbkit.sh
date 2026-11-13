@@ -2,13 +2,16 @@
 # Runs PCBKit's CLI for this plugin: this version's build for this computer, fetched once from
 # PCBKit's releases into ~/.pcbkit/bin and checked against the checksum below.
 set -eu
-VERSION="0.1.9"
+VERSION="2.0.2"
+# (The CLI is told where this file is: `pcbkit init` copies it into a repository.)
+case "$0" in /*) PCBKIT_LAUNCHER="$0" ;; *) PCBKIT_LAUNCHER="$PWD/$0" ;; esac
+export PCBKIT_LAUNCHER
 if [ -n "${PCBKIT_BIN:-}" ] && [ -x "$PCBKIT_BIN" ]; then exec "$PCBKIT_BIN" "$@"; fi
 case "$(uname -s)-$(uname -m)" in
-  Darwin-arm64) TARGET=darwin-arm64; SUM=fea0b8429593d099857b635e8181d0184cafe488d9ed7e087426ec1af2031eee ;;
-  Darwin-x86_64) TARGET=darwin-x64; SUM=3a7beee3a998a94d9ca80011925b9c9faf6fa24e8a1be6dbb727b53eac9d862f ;;
-  Linux-x86_64) TARGET=linux-x64; SUM=f4c5746034f219198e1a3e71571b5c7577d762d919a6a24d60d07e5f5f807e64 ;;
-  Linux-aarch64|Linux-arm64) TARGET=linux-arm64; SUM=78c4669f4ff4bc37d8b4d3d62e0d7adbd2493982a4454a8ad5a9c9a73fd50453 ;;
+  Darwin-arm64) TARGET=darwin-arm64; SUM=b8da94e956b9fd609eeb7fe0863a0117ed0d54eab498d52e742962d102ff507a ;;
+  Darwin-x86_64) TARGET=darwin-x64; SUM=a0475144294a72aaa4487b53b97ce7c45a70f0a6428fcdddd7f202a13c1b26d6 ;;
+  Linux-x86_64) TARGET=linux-x64; SUM=720e9dd04c18b3b228f040efc1f98febe15dc4edab164a93b4bf1da3f65f7697 ;;
+  Linux-aarch64|Linux-arm64) TARGET=linux-arm64; SUM=af695522bdc52056bacc76733983ac8ddeca22c7b54c0a43ac52fca91300d19b ;;
   *) echo "PCBKit has no build for $(uname -s) $(uname -m) yet: https://github.com/pcbkit-io/agent-plugin/issues" >&2; exit 1 ;;
 esac
 DIR="${PCBKIT_HOME:-$HOME/.pcbkit}/bin"

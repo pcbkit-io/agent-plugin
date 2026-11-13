@@ -21,7 +21,7 @@ Go through this against the board before you say it is done. Read as a reviewer 
 
 ## Schematic and connections
 
-- [ ] Every part's pins match its datasheet's table for this package (number, function), and its footprint is that package (pin 1, pad count, exposed pad).
+- [ ] Every part's pins match its datasheet's table for this package (number, function), and its footprint is that package (pin 1, pad count, pitch, the span over the rows, the exposed pad). For each part of more than two pins, the review names the datasheet's page for the pin table and the page for the land pattern, and says how sure it is (read from the page; read from a picture of the page; could not be read). "Checked" without a page is not checked: say so instead.
 - [ ] `check` is clean: the schematic's electrical rules (or each message has its reason in `DESIGN.md`), and the board and the schematic connect the same pads.
 - [ ] No input floats: every unused input, enable, reset and strap pin is tied where the datasheet says.
 - [ ] No two outputs share a net (unless open drain, with its pull-up).

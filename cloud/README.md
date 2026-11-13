@@ -22,6 +22,7 @@ Try:
 | `show`                            | Shows the board live in the conversation and gives its link                        |
 | `bash`, `edit`                    | Work on the project's files in its sandbox on PCBKit's servers                     |
 | `find_parts`, `part`, `save_part` | Search PCBKit's library of about 7 million parts with KiCad symbols and footprints |
+| `schematic`                       | Draws the schematic from the agent's description, as a person draws one            |
 | `route`                           | Routes the board with PCBKit's autorouter, by the board's own rules                |
 | `check`                           | Checks the project, with KiCad's design and electrical rule checks                 |
 | `nets`, `look`                    | Read back what the board connects and give the agent a picture, to verify its work |
@@ -43,5 +44,15 @@ sandbox, part searches), not your conversation.
 [Privacy policy](https://pcbkit.io/privacy) · [Terms](https://pcbkit.io/terms) ·
 support@pcbkit.io
 
-To work on a KiCad project in a folder on your own computer instead (Claude Code, Codex), install
-the plugin from [pcbkit-io/agent-plugin](https://github.com/pcbkit-io/agent-plugin).
+## A KiCad project in a folder of your own
+
+This plugin keeps the board in your PCBKit account. To work on KiCad files where they are, in a
+folder on your computer or in a repository (Claude Code, Codex, any coding agent), use PCBKit's
+plugin for folders from [pcbkit-io/agent-plugin](https://github.com/pcbkit-io/agent-plugin): the
+same tools and skill, run by PCBKit's CLI on the files in place. In Claude Code:
+
+```
+/plugin install pcbkit --marketplace pcbkit-io/agent-plugin
+```
+
+There it takes this plugin's place while it is installed.

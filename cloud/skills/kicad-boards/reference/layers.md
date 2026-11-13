@@ -53,6 +53,8 @@ Every current comes back, and above a few hundred kilohertz it comes back in the
 - when a signal changes layers, its return needs a way to follow: a ground via beside the signal's via;
 - ground is one net. Do not split it into "analog" and "digital" planes joined at a point: keep it whole and keep the noisy parts and the sensitive parts in different places (reference/placement.md). A split with a track across it is worse than no split;
 - ground vias stitch the front and back pours to the plane, around the board's edge and beside every decoupling capacitor's ground pad.
+- copper poured beside a track of controlled impedance is part of that track: closer than about three track widths it lowers the impedance (the track becomes coplanar). Keep the pour back from such tracks by a rule, or set the width for the pour's distance and let `analyze signal` say what it came to;
+- a piece of pour joined to its net by one thin neck, or to nothing, is an antenna beside whatever runs past it: stitch it to the plane with vias or take it out. Fill islands are removed by the zone's own setting; a strip left between two tracks is yours to notice (`look`).
 
 ## Widths, clearances and holes as rules
 

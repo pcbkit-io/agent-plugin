@@ -2,6 +2,7 @@
 
 ## Contents
 
+- The board by its script: `pcbkit.pcb`
 - The smallest valid board
 - Layers, pads, parts on the back, net classes
 - Four layers: planes
@@ -9,7 +10,35 @@
 
 KiCad files are S-expressions: one item per list, `(footprint …)`, `(segment …)`, `(via …)`, `(zone …)`, `(symbol …)`, each with its own `(uuid "…")`. Coordinates are millimetres, y grows downwards; `(at x y angle)` places an item. A project is `<name>.kicad_pro` (settings, net classes), `<name>.kicad_pcb` (the board) and `<name>.kicad_sch` (the schematic), named alike.
 
-For more than a few items, write the files with a short script (Python) instead of by hand: generate uuids, compute positions, print the S-expressions. Keep the script in the project (`scripts/`): the next change runs it again.
+A new board, and every later change of its parts, outline or planes, is made by the project's script (`scripts/board.py`, below), not typed: the script is run again at every change and keeps what is placed and routed. Text edits are for a board that came without a script, and for single small changes.
+
+## The board by its script: `pcbkit.pcb`
+
+`pcbkit.pcb` is PCBKit's own (it comes with every PCBKit, like `pcbkit.schematic`), over KiCad's `pcbnew`, which writes the file as KiCad does. Run the script with `pcbkit python scripts/board.py` (plain `python3` in PCBKit's own shell).
+
+```python
+# scripts/board.py: the board, from the same description as the schematic. Run it again after every change.
+import sys; sys.path.insert(0, "scripts")
+from pcbkit.pcb import Pcb
+from design import s
+
+b = Pcb("board.kicad_pcb", layers=2)            # opens the board, or starts it (layers: 2, 4, …)
+b.outline(100, 100, 148, 130, radius=2)         # mm; b.outline(points=[…]) for another shape
+b.slot(120, 126, 128, 126, width=1.0)           # b.cut([…]) for any closed cut-out
+b.update(s)                                     # the description's parts and nets onto the board
+b.place({"J1": (103, 115, 270), "U1": (124, 114), "C1": (119.5, 109.5, 90), "SW1": (140, 104, 0, "back")})
+b.zone("GND", "B.Cu")                           # a plane over the whole board (points=[…] for a part of it)
+b.keepout([(140, 100), (148, 100), (148, 112), (140, 112)])   # nothing under an antenna
+b.text("RESET", 140, 101.5)                     # silkscreen
+print(b.near(s))                                # each two-pin part's distance from the pin it serves
+b.save()                                        # fills the planes, writes the file, says what is not placed
+```
+
+- **`update(s)`** loads each new part's footprint (from the project's `parts.pretty`, which `save_part` fills, or KiCad's own libraries), gives every pad its net, and sets values and fields. A new part waits under the board until `place` puts it somewhere; a part already on the board stays where it is. A part the description no longer has is named, and taken off with `update(s, remove=True)`.
+- **What a second run keeps**: every footprint's place unless `place` names it, every track and via, everything a person drew in KiCad. **What it makes again**: its own outline, slots, planes, keep-outs and texts (KiCad shows them as a group named `pcbkit`). So a change is a changed number and another run, then `route` for what the change opened; never a board built from nothing, which throws the routing away.
+- **Places are the footprint's origin** in mm, y downwards, the angle in degrees counter-clockwise as KiCad shows it; `b.where()` reads every part's place back. `b.pins("U1")` says which side of a part each pin is on as it sits, with its net: what a chip's angle is chosen by (reference/placement.md).
+- **Anything it has no word for** is `pcbnew` itself on `b.board` (reference/kicad-tools.md says where KiCad 10's Python trips).
+- An error names what to change: a footprint that is not in its library with the names near it, a pin of the description its footprint has no pad for (the symbol and the footprint are not of one package), a net the board does not have.
 
 ## The smallest valid board
 

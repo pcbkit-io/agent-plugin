@@ -71,6 +71,8 @@ Two: parts and tracks on the front, ground on the back. Nothing here is fast.
 
 The nets themselves live in `scripts/design.py` (gate 4), once, not copied here: `DESIGN.md` says what and why, the script says what is joined to what.
 
+`# Goal` is the person's, in their words: what they are building, the constraints they gave, the choices they made. When a message says something new about any of these, change it there first, then the design. It never holds your progress, a plan or a list of what is left: those are the conversation's.
+
 Two things to settle at the start, by asking when the request does not say: **who builds it** (soldered by hand, or assembled by a factory: it decides the parts' sizes and packages) and **what it is powered from**. Everything else gets a default you name.
 
 Where the goal is a number (efficiency, battery life, price, size), write it as a budget under its own heading before the parts are final, every term of the goal as the person stated it with its figure: for a power stage the watts lost in each part at the real current (from its datasheet), summed to the efficiency you expect; for a battery device the average current and the life it gives; where the goal names cost or size, the parts' price and the board's area in the same table. A term left without a number is a term dropped, and the design over-builds on the ones that were counted.
@@ -87,7 +89,7 @@ Read **reference/parts.md** before choosing parts. In short: find parts with `fi
 
 ## 4. The schematic
 
-Read **reference/schematic.md**. Describe the parts and the net of each pin once, in `scripts/design.py`, and write the schematic from it with this skill's `scripts/schematic.py`: blocks under their names, every pin with its net. Then `check`: KiCad's electrical rules find the input nothing drives, the two outputs on one net, the net name spelt two ways. Look at its picture, then show it to the person (`view: schematic`) with a line on each block and the questions from gate 2: a misunderstanding caught here costs nothing.
+Read **reference/schematic.md**. Describe the parts and the net of each pin once, in `scripts/design.py` (written with `pcbkit.schematic`, which every PCBKit has), and draw it with the `schematic` tool: blocks in frames, two-pin parts wired to what they serve, a name on each chip pin. Its answer has what KiCad's electrical rules found (the input nothing drives, the two outputs on one net, the net name spelt two ways) and the sheet's picture: read every block of it (`look { view: "schematic", around: "U1" }` zooms in), change the description and draw again until it reads the way you would explain it. Then show it to the person (`view: schematic`) with a line on each block and the questions from gate 2: a misunderstanding caught here costs nothing.
 
 ## 5. Layers
 
@@ -95,7 +97,7 @@ Read **reference/layers.md**. Two layers or four, what each carries, and the wid
 
 ## 6. The board file, and the connections read back
 
-The files' format, the smallest valid board and how to change a board that exists are in **reference/format.md**. Write the outline (one closed shape on `Edge.Cuts`) and the footprints with the schematic's references, each pad given its net from the same description the schematic was written from.
+Read **reference/format.md**. The board is made by its script, `scripts/board.py`, written with `pcbkit.pcb` and run with `pcbkit python scripts/board.py`: the outline, then `b.update(s)`, which puts the description's parts and nets on the board, then `b.place(…)`, the planes and `b.save()`. The script is run again at every change and keeps what is placed and routed: never build a board from nothing twice.
 
 Then `check`: it compares the board with the schematic pad by pad and names every difference. A rule check cannot know that a pin is on the wrong net; this comparison can. `nets { part: "U1" }` reads one part's pins back when you want to see them against the datasheet's table.
 
@@ -149,4 +151,4 @@ You are the one in the conversation who has built boards before. That means sayi
 
 ## After each write
 
-PCBKit checks the KiCad files you wrote and reports syntax problems with line and column: fix them before anything else. The person sees every write at once, so work in steps that leave the files valid. Other agents and the person may be changing the same project: read a file again before you change it.
+PCBKit checks the KiCad files you wrote and reports syntax problems with line and column: fix them before anything else. The person sees every write at once, so work in steps that leave the files valid. Every file in the project's folder is the project's: the person sees it, and a second board or project file there stands in the tools' way. Try things in `/tmp` (a copy of the board, a symbol you are testing), and keep what you fetched to read (datasheets, a reference design) under `refs/`. Other agents and the person may be changing the same project: read a file again before you change it. What the person has selected is in the view file (`select`): when what you are about to change is what they are at and they did not ask for it, say so in a line and do something else first.

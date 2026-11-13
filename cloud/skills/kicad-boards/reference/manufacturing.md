@@ -12,7 +12,7 @@ A board is made by the factory's rules, not KiCad's defaults, and the factory bu
 
 ## The factory's limits as rules
 
-Before any file for a factory is made, get its capability page (`curl` it into `refs/`) and write what it says into `<name>.kicad_dru` and the board's design rules: the smallest track and gap for this layer count and copper weight, the smallest hole and its ring, the distance of copper and of holes from the edge, the smallest solder-mask web between pads, the smallest silkscreen line and text. `check` then holds the board to them, and a finding there is fixed in the board, not waved through.
+Before any file for a factory is made, get its capability page, keep a copy in `refs/`, and write what it says into `<name>.kicad_dru` and the board's design rules: the smallest track and gap for this layer count and copper weight, the smallest hole and its ring, the distance of copper and of holes from the edge, the smallest solder-mask web between pads, the smallest silkscreen line and text. `check` then holds the board to them, and a finding there is fixed in the board, not waved through. Beside each limit in the rules file goes where it came from and the day it was read (a comment: the factory's page, 13 November 2026): limits change, and a rule without its source cannot be checked again. A factory often has two numbers for one thing, what it makes at its ordinary price and what it can make for more: a board between the two is not wrong, it costs more, and that is said as a cost.
 
 Typical limits when the factory's page cannot be read (say that you used these): tracks and gaps 0.127 mm (0.1 mm costs nothing extra at most factories, less than that does); a via with a 0.3 mm hole in a 0.6 mm pad; a plated hole's ring 0.15 mm; copper 0.3 mm from the edge; mask web 0.1 mm; silkscreen lines 0.15 mm and text 1 mm high. Stay away from the limits where there is room: a board at the limit everywhere yields worse.
 
@@ -22,6 +22,7 @@ Say in the notes for the factory what the files cannot: the board's thickness an
 
 - Every line of the BOM has its maker's part number and, for the factory that assembles, the factory's own number; `find_parts` and `part` say the stock. A part out of stock is replaced now, with its footprint checked again, not at the order.
 - Prefer the factory's stocked (basic) parts for passives: they cost no loading fee.
+- Parts on one side where the board allows: a second side is a second pass through the machine and its price.
 - Parts not to be fitted are marked DNP in the board and the schematic, not left out of the BOM by hand.
 - The BOM is generated from the files (`export` makes it from the schematic), never edited by hand: a part number that must change is changed in the schematic.
 

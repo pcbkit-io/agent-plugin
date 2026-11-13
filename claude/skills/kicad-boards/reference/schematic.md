@@ -4,7 +4,8 @@
 
 - Why the schematic comes before the board
 - One description, two files
-- Writing it: `scripts/schematic.py`
+- Writing it: `scripts/design.py` and the `schematic` tool
+- What it draws, and how to make it read well
 - Symbols, pins, nets
 - Blocks a person can read
 - What KiCad's electrical rules say
@@ -20,16 +21,15 @@ So the order is: `DESIGN.md` (what and why, in words), the schematic (what is jo
 
 ## One description, two files
 
-Write the parts and the net of each pin **once**, in a script of the project (`scripts/design.py`), and make both files from it: the schematic through `schematic.py`, the board's nets from the same object. Two files typed by hand from memory drift apart; two files made from one list cannot, and `check` proves it.
+Write the parts and the net of each pin **once**, in a script of the project (`scripts/design.py`), and make both files from it: PCBKit draws the schematic from it, and the board's pads take their nets from the same object. Two files typed by hand from memory drift apart; two files made from one list cannot, and `check` proves it.
 
-## Writing it: `scripts/schematic.py`
+## Writing it: `scripts/design.py` and the `schematic` tool
 
-This skill has `scripts/schematic.py` (in PCBKit's shell: `/pcbkit/skills/kicad-boards/scripts/schematic.py`; in a plugin: `scripts/schematic.py` in this skill's folder). Copy it into the project's `scripts/`, so the project builds anywhere. It needs Python 3 and KiCad's symbol libraries, nothing else.
+The description is Python, written with `pcbkit.schematic` (PCBKit's own: nothing to copy or install, it comes with every PCBKit). **Draw it with the `schematic` tool** (`pcbkit schematic` in a shell): it runs the script, writes the `.kicad_sch`, runs KiCad's electrical rules on it and answers with their findings and a picture of the sheet.
 
 ```python
-# scripts/design.py: the design, once. Run it from the project's folder: python3 scripts/design.py
-import sys; sys.path.insert(0, "scripts")
-from schematic import Schematic
+# scripts/design.py: the design, once.
+from pcbkit.schematic import Schematic
 
 s = Schematic("board", title="USB-C blinker", rev="A")
 s.part("J1", "Connector:USB_C_Receptacle_USB2.0_16P", "USB-C", block="Power in",
@@ -42,14 +42,33 @@ s.part("R1", "Device:R", "5.1k", block="Power in", pins={"1": "CC1", "2": "GND"}
 s.part("U1", "Timer:TLC555xD", "TLC555", block="Timer",
        pins={"8": "+5V", "1": "GND", "4": "+5V", "2": "TRIG", "6": "TRIG", "7": "DIS", "3": "OUT", "5": "CV"},
        footprint="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+s.part("C1", "Device:C", "100nF", block="Timer", pins={"1": "+5V", "2": "GND"}, footprint="Capacitor_SMD:C_0603_1608Metric")
 s.flag("+5V", "GND")                      # power comes in from outside the sheet here
 s.note("Power in", "5 V from USB-C; R1 and R2 ask the charger for it.")
 
 if __name__ == "__main__":
-    print(s.write("board.kicad_sch"))     # the paper it took
+    s.write("board.kicad_sch")
 ```
 
-It draws each part's symbol, the parts of a block side by side under the block's name, a short wire and a global label on every connected pin, and a no-connect mark on every pin given no net. A wrong pin stops it with the symbol's real pins listed: read that list against the datasheet's table rather than trying names until one passes.
+A wrong pin stops it with the symbol's real pins listed, a wrong symbol name with the names near it: read that list against the datasheet's table rather than trying names until one passes. Every time it is drawn, the file is read back through KiCad and held to the description pin for pin, so what you described is what the file connects. A schematic PCBKit did not draw (a person's own) is never drawn over.
+
+## What it draws, and how to make it read well
+
+It draws the way a person draws a schematic to be read, from what the nets say:
+
+- **A chip** (any part with more than two pins) stands with a name on each connected pin; neighbouring pins of one net are joined and named once; a pin given no net gets a no-connect mark.
+- **Two-pin parts are wired**, not named. A supply's capacitors stand side by side between the supply's symbol and ground's. What hangs on a signal is drawn on that signal's wire under one name: a pull-up over it, a capacitor or a resistor to ground under it, a part in series and what follows it (an LED, then its resistor, then ground).
+- **Supplies and grounds** are KiCad's power symbols where a part stands between them (`+3V3`, `+5V`, `VBUS`, `GND`: names KiCad has a symbol for), a name elsewhere.
+- **Each block** is a frame with its name and its sentence; the paper is the smallest the blocks fit on.
+
+What you choose decides how well it reads:
+
+- **Blocks by what they do**, a few parts each (a chip and what serves it), in the order power and signals flow. One block of forty parts reads as a parts list.
+- **In a block, the chip first, then what serves it** in the order of its pins: pieces are drawn in the order you describe them.
+- **Net names a person can follow**: a signal by what it carries (`I2C_SDA`, `~{RESET}`, `LED_STATUS`), a supply by KiCad's own spelling (`+3V3`, not `3V3` or `VCC_3V3`), so it gets its symbol. A net between two parts of one chain (an LED and its resistor) still needs a name: say what it is (`LED_STATUS_K`).
+- **Values with their unit**: `100nF`, `4.7uF`, `10uH`, `10k`, `4.7R` (an R, not an omega sign), and for a part that is not a passive its part number.
+- **A test point or a jumper in the block of the net it is on**, after the parts that make that net, not in a block of leftovers.
+- **One net, one job**: a net that is a supply is drawn as one everywhere. Do not name a signal like a supply (`VBAT_SENSE` is fine; a signal called `+VSENSE` is drawn as a supply).
 
 ## Symbols, pins, nets
 
@@ -82,32 +101,22 @@ An error is fixed in `scripts/design.py`, not waved through; a warning is fixed 
 
 ## Look at it, and show it
 
-Make its picture and read it (reference/kicad-tools.md: `kicad-cli sch export svg`, `rsvg-convert`): a label that is not what you meant, a block that grew unreadable, a part in the wrong block. Then put it in front of the person: `view: schematic` in `.pcbkit/view.yaml` (reference/view.md), with a sentence on what each block does. A person who looks at the schematic before the board exists catches a misunderstanding when it costs nothing.
+The `schematic` tool answers with the sheet's picture: **read it, every block**, before going on. `look { view: "schematic", around: "U1" }` zooms in on a part (texts on a whole A3 are small), `center` and `across` on a place. What to look for, and what to change in the description when you see it:
+
+- a chip pin whose name is not what the datasheet's table says for that number: the pin, not the drawing, is wrong;
+- a part drawn alone between two names when it belongs to a chain: one of its nets is spelt differently from its neighbour's;
+- a capacitor or a pull-up in another block than the chip it serves: move it to that chip's block, after the chip;
+- a block that grew past what one look takes in: split it by function;
+- a pin marked not connected that the datasheet says must be tied.
+- a block that differs from the maker's reference circuit for its chip (reference/parts.md): put the two pictures side by side.
+
+Change the description, draw again, look again: two or three rounds is usual. Then put it in front of the person: `view: schematic` in `.pcbkit/view.yaml` (reference/view.md), with a sentence on what each block does. A person who looks at the schematic before the board exists catches a misunderstanding when it costs nothing.
 
 ## The board from the same description
 
-The board's footprints carry the same references, and its pads get their nets from `s.nets()`:
+The board's script (`scripts/board.py`, written with `pcbkit.pcb`: reference/format.md) imports the same object, and `b.update(s)` puts its parts and nets on the board: footprints with the schematic's references, every pad on the net its pin has here.
 
-```python
-# scripts/board.py (part of it): the pads' nets from the design
-import sys; sys.path.insert(0, "scripts")
-import pcbnew
-from design import s
-
-board = pcbnew.LoadBoard("board.kicad_pcb")
-for name, pins in s.nets().items():
-    net = board.FindNet(name)
-    if net is None:
-        net = pcbnew.NETINFO_ITEM(board, name)
-        board.Add(net)
-    for ref, number in pins:
-        for pad in board.FindFootprintByReference(ref).Pads():
-            if pad.GetNumber() == number:
-                pad.SetNet(net)
-board.Save("board.kicad_pcb")
-```
-
-Then `check`: it says whether the board and the schematic connect the same pads, and names each pad that differs. A part on one and not on the other, or a pad on another net, is fixed before anything is placed.
+Then `check`: it says whether the board and the schematic connect the same pads, and names each pad that differs. A part on one and not on the other, or a pad on another net, is fixed in the description and drawn and updated again, before anything is placed.
 
 ## Changing a schematic a person drew
 

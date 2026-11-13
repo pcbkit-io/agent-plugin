@@ -1,7 +1,7 @@
 {
   "name": "pcbkit",
   "displayName": "PCBKit",
-  "version": "0.1.9",
+  "version": "2.0.2",
   "description": "Design printed circuit boards with your agent as plain KiCad projects: PCBKit keeps the project, shows the board live, chooses real parts, routes the copper, checks it with KiCad's rules and makes the files a factory needs.",
   "author": {
     "name": "PCBKit",

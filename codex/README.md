@@ -32,6 +32,7 @@ Then open a folder (empty, or with a KiCad project) and ask:
 | `show`                            | Opens the board live in your browser, in 2D and 3D; it follows every change of the files         |
 | `route`                           | Routes the board with PCBKit's autorouter, by the board's own rules                              |
 | `find_parts`, `part`, `save_part` | Searches PCBKit's library of about 7 million parts with KiCad symbols and footprints             |
+| `schematic`                       | Draws the schematic from the agent's description of the parts and nets, as a person draws one    |
 | `check`                           | Checks the KiCad files, with KiCad's own design rule check where KiCad is installed              |
 | `nets`, `look`                    | Reads back what the board connects and gives the agent a picture, to verify its own work         |
 | `analyze`                         | Computes what the routed board means physically: voltage drop, impedance, heat, supply impedance |
@@ -41,6 +42,35 @@ Then open a folder (empty, or with a KiCad project) and ask:
 
 and a skill that teaches it to read and change KiCad files as text and to take a board from an idea
 to routed and checked.
+
+## Any agent, any repository
+
+The plugin is the short way in for Claude Code and Codex. Behind it is PCBKit's CLI, and the CLI
+alone gives the same tools to every other place an agent works on a folder.
+
+**A repository that carries PCBKit.** Ask your agent to set the repository up for PCBKit, or run
+`pcbkit init` in it, and commit what it writes: PCBKit's launcher (`.pcbkit/pcbkit.sh`), the MCP
+server's entry (`.mcp.json`) and the hooks (`.claude/settings.json`). An agent that works in a
+clone then has PCBKit with nothing installed: Claude Code in the cloud (let the session's
+environment reach `pcbkit.io` and `github.com`), a teammate's computer, a scheduled run.
+
+**Another agent** (Cursor, Gemini CLI, any MCP client): give it an MCP server whose command is
+`sh .pcbkit/pcbkit.sh mcp` in such a repository, or `pcbkit mcp` with the CLI installed. The server
+tells the agent where the skill is on the computer.
+
+**The CLI by itself** is the launcher under the name `pcbkit`:
+
+```
+curl -fsSL https://raw.githubusercontent.com/pcbkit-io/agent-plugin/main/pcbkit.sh -o ~/.local/bin/pcbkit
+chmod +x ~/.local/bin/pcbkit
+```
+
+`pcbkit open` shows a folder's board in the browser; `pcbkit route`, `check`, `analyze`, `export`
+and the rest are the tools as commands (`pcbkit help`).
+
+**No folder at all** (Claude in chat, Cowork, ChatGPT): add PCBKit from the app's own directory, or
+its server `https://pcbkit.io/mcp` as a connector. The board is then a project kept in your PCBKit
+account.
 
 ## Your files stay on your computer
 
@@ -62,5 +92,7 @@ it against the checksum in `pcbkit.sh`.
 `claude/` is the plugin for Claude Code, `codex/` the same plugin for Codex: both work on a folder
 on your computer. `cloud/` is the plugin as Claude's directory lists it (Claude in chat, Cowork and
 Claude Code): the same skill with PCBKit's own server at `https://pcbkit.io/mcp`, where the board is
-a project kept in your PCBKit account and nothing runs on your computer. All are generated from
-PCBKit's source; issues are welcome here.
+a project kept in your PCBKit account and nothing runs on your computer; it is texts only, and the
+branch `directory` is its latest version. Both are named `pcbkit`: in Claude Code the plugin for a
+folder, once installed, takes the listed one's place. `pcbkit.sh` is the launcher by itself. All
+are generated from PCBKit's source; issues are welcome here.

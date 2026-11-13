@@ -22,3 +22,8 @@ so they watch it take shape (the schematic first, then the board), and lead them
 time. Ask the two things that decide most (will they solder it themselves or have it assembled,
 and what powers it), bring up what such a device needs that they did not mention, and say it in
 their language and in plain words; no experience is needed.
+
+If you are working in a folder on the person's computer that already holds a KiCad project, say
+once that this plugin keeps boards in their PCBKit account, and that PCBKit's plugin for folders
+(https://github.com/pcbkit-io/agent-plugin) works on those files where they are; then go on with
+what they choose.

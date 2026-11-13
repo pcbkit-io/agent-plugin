@@ -115,6 +115,7 @@ At the review (reference/review.md) go through both lists again against the fini
 
 - The signal fits the ADC: a divider or attenuation to bring it inside the range, a capacitor at the pin, the source's impedance low enough for the sample time; a reference where the supply is not steady enough.
 - A sensor sits where it can sense: a temperature sensor away from the regulator and the processor; a motion sensor near the board's centre and fixed; a microphone's port and a light sensor's window clear, and facing out of the case.
+- A device that measures temperature is warmed by itself: a radio that stays on and a linear regulator put several kelvin into a small board, more in a case, and the sensor reads the board, not the air. Decide how the program runs before the board (asleep between readings, the radio on for the moment it sends: a fraction of a kelvin), say it to the person as what they will read, and let `analyze heat` show the board under the sensor for the current the program really draws (`.pcbkit/analysis.yaml`).
 - Every I²C device's address is checked against the others on the bus (two parts with one fixed address need two buses or a multiplexer); address pins tied, pull-ups once.
 - Parts on different rails get a level shifter, or a pin the datasheet calls tolerant.
 
