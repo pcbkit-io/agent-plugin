@@ -110,7 +110,7 @@ The `schematic` tool answers with the sheet's picture: **read it, every block**,
 - a pin marked not connected that the datasheet says must be tied.
 - a block that differs from the maker's reference circuit for its chip (reference/parts.md): put the two pictures side by side.
 
-Change the description, draw again, look again: two or three rounds is usual. Then put it in front of the person: `view: schematic` in `.pcbkit/view.yaml` (reference/view.md), with a sentence on what each block does. A person who looks at the schematic before the board exists catches a misunderstanding when it costs nothing.
+Change the description, draw again, look again: two or three rounds is usual. Then put it in front of the person: `view { view: "schematic" }` (reference/view.md), with a sentence on what each block does. A person who looks at the schematic before the board exists catches a misunderstanding when it costs nothing.
 
 ## The board from the same description
 

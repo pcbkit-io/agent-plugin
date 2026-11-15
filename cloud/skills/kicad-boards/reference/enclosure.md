@@ -231,8 +231,8 @@ is also in `enclosure/out/build.json` (`state`: building, built or failed; `said
 ### 8. What you tell the person
 
 - What you made: the parts, the hardware to buy (the build's list), the size.
-- To show them a step of the assembly, or every part laid out, write `stage: n` into the view file
-  (`.pcbkit/view.yaml`, with `view: 3d`): their view glides there.
+- To show them a step of the assembly, or every part laid out, call `view` with `stage: n` (and
+  `view: "3d"`): their view glides there.
 - **To measure before printing**: every number that came from a datasheet and not from the board
   file, by its name in the program and what to measure.
 - How to print each part: which face on the bed, whether on supports. Suggest printing the smallest
