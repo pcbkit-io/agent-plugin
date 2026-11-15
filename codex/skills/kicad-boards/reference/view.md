@@ -7,9 +7,10 @@ view: 3d # 2d, 3d or schematic
 select: [U1, C3, "net:GND"] # lit and framed: references, pads (U1/3), net:<name>, layer:<name>, item uuids
 layers: { "B.Cu": false, "F.SilkS": true } # KiCad layer names shown or hidden
 components: false # the bare board, without parts
-explode: true # the copper layers apart
+drawings: false # 2D: without the footprints' own silkscreen, courtyard and texts (the board's own follow `layers`)
+explode: true # the board apart: 2D its copper layers as sheets side by side; 3D its parts off it, then its layers dealt out on the ground
 stage: 3 # a device with a built enclosure, in 3D: its assembly taken apart to this stage (0: together; the last: every part laid flat)
-look: { mask: Black } # a mask colour to try in 3D (Green, Black, Blue, Red, White, Purple, Yellow, "#RRGGBB"); the design keeps its own
+look: { mask: Black } # how the board is shown made in 3D, the design keeps its own: mask (Green, Black, Blue, Red, White, Purple, Yellow, Clear, None, "#RRGGBB"), silk (White, Black, Yellow), finish (ENIG, "HAL lead-free", OSP, None for bare copper, …), material (FR4, Al, Polyimide, Glass for a clear glass board: copper tracks on glass, no mask unless one is named)
 camera:
   2d: { center: [110, 105], width: 40 } # mm
   3d: { target: [110, 105, 0], yaw: 30, pitch: 40, distance: 120 }

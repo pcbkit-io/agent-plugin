@@ -2,16 +2,16 @@
 # Runs PCBKit's CLI for this plugin: this version's build for this computer, fetched once from
 # PCBKit's releases into ~/.pcbkit/bin and checked against the checksum below.
 set -eu
-VERSION="2.0.2"
+VERSION="2.0.3"
 # (The CLI is told where this file is: `pcbkit init` copies it into a repository.)
 case "$0" in /*) PCBKIT_LAUNCHER="$0" ;; *) PCBKIT_LAUNCHER="$PWD/$0" ;; esac
 export PCBKIT_LAUNCHER
 if [ -n "${PCBKIT_BIN:-}" ] && [ -x "$PCBKIT_BIN" ]; then exec "$PCBKIT_BIN" "$@"; fi
 case "$(uname -s)-$(uname -m)" in
-  Darwin-arm64) TARGET=darwin-arm64; SUM=b8da94e956b9fd609eeb7fe0863a0117ed0d54eab498d52e742962d102ff507a ;;
-  Darwin-x86_64) TARGET=darwin-x64; SUM=a0475144294a72aaa4487b53b97ce7c45a70f0a6428fcdddd7f202a13c1b26d6 ;;
-  Linux-x86_64) TARGET=linux-x64; SUM=720e9dd04c18b3b228f040efc1f98febe15dc4edab164a93b4bf1da3f65f7697 ;;
-  Linux-aarch64|Linux-arm64) TARGET=linux-arm64; SUM=af695522bdc52056bacc76733983ac8ddeca22c7b54c0a43ac52fca91300d19b ;;
+  Darwin-arm64) TARGET=darwin-arm64; SUM=604e7b2cabbace778695a659f205ea54b7378e5a6cfcb6e6c75e5f577c829d95 ;;
+  Darwin-x86_64) TARGET=darwin-x64; SUM=2972a6be3272e31fd977dc225f397ea33d330dd92523f2de82316271c0fb868a ;;
+  Linux-x86_64) TARGET=linux-x64; SUM=00010f6c094e7ce9c5862a097b71c471f86ef38b649ff7af18b7d0e76f3d3054 ;;
+  Linux-aarch64|Linux-arm64) TARGET=linux-arm64; SUM=f5b096566902fc41aae5b45327df12b35800dda23cd03fefe736621ae2627707 ;;
   *) echo "PCBKit has no build for $(uname -s) $(uname -m) yet: https://github.com/pcbkit-io/agent-plugin/issues" >&2; exit 1 ;;
 esac
 DIR="${PCBKIT_HOME:-$HOME/.pcbkit}/bin"
@@ -23,8 +23,12 @@ LOCK="$BIN.fetching"
 # agent's host gives up waiting for its first start; a fetch cut short goes on from where it stopped.
 fetch() {
   URL="https://github.com/pcbkit-io/agent-plugin/releases/download/v$VERSION/pcbkit-$TARGET.gz"
-  if command -v curl >/dev/null 2>&1; then curl -fsSL -C - "$URL" -o "$PART" || { rm -f "$PART"; curl -fsSL "$URL" -o "$PART"; }
-  elif command -v wget >/dev/null 2>&1; then wget -qc -O "$PART" "$URL"
+  # (A connection that goes silent is given up after a minute, so the lock below is let go.)
+  if command -v curl >/dev/null 2>&1; then
+    T="--connect-timeout 20 --speed-limit 1024 --speed-time 60"
+    # shellcheck disable=SC2086
+    curl -fsSL $T -C - "$URL" -o "$PART" || { rm -f "$PART"; curl -fsSL $T "$URL" -o "$PART"; }
+  elif command -v wget >/dev/null 2>&1; then wget -qc -T 60 -O "$PART" "$URL"
   else echo "PCBKit needs curl or wget to fetch its CLI."; return 1; fi
   if command -v shasum >/dev/null 2>&1; then GOT=$(shasum -a 256 "$PART" | cut -d' ' -f1)
   else GOT=$(sha256sum "$PART" | cut -d' ' -f1); fi
